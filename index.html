@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapssage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+}
+button, select {
+  font-family: inherit;
+}
+
+    html, body { margin: 0; padding: 0; height: 100%; background: #111; }
+    #map { height: 100%; width: 100%; }
+    .chat-bubble {
+      background: #333; color: #fff; border-radius: 12px;
+      padding: 8px 10px; min-width: 160px; max-width: 240px;
+      font-family: sans-serif; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      position: relative;
+    }
+    .chat-header { display: flex; align-items: center; margin-bottom: 4px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; margin-right: 6px; }
+    .username { font-weight: bold;  }
+    .chat-text {  margin-bottom: 4px; word-wrap: break-word; }
+    .reactions { display: flex; gap: 6px;  }
+    .reaction {
+      background: #444; border-radius: 10px; padding: 2px 6px;
+      color: white; cursor: pointer;
+    }
+    .reaction.active { background: #1e90ff; }
+    .timestamp { font-size: 10px; color: #bbb; text-align: right; }
+    .views {
+      font-size: 11px; color: #888;
+      position: absolute; top: 6px; right: 10px; opacity: 0.5;
+    }
+    .comment-preview {
+      font-size: 11px; color: #ccc; margin-top: 4px; cursor: pointer;
+    }
+    .comment-block {
+      font-size: 11px; color: #ddd; background: #2a2a2a;
+      border-radius: 6px; padding: 4px 6px; margin-top: 4px;
+    }
+    #create-btn {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background-color: #1e90ff; color: white; border: none; border-radius: 50%;
+      width: 48px; height: 48px; font-size: 24px; line-height: 48px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4); cursor: pointer; z-index: 1000;
+    }
+    #message-input {
+      position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: #222; padding: 12px; border-radius: 12px;
+      width: 90%; max-width: 400px; display: none; z-index: 1000; color: white;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(30, 144, 255, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(30, 144, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(30, 144, 255, 0); }
+    }
+    #message-input .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;
+    }
+    #message-input textarea {
+      width: 100%; padding: 8px; 
+      border: none; border-radius: 8px; resize: none; margin-bottom: 8px;
+    }
+    #message-input button {
+      width: 100%; padding: 8px; 
+      background: #1e90ff; color: white; border: none; border-radius: 8px;
+    }
+  
+/* подвал удалён */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1c1c1c;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0;
+  z-index: 1002;
+  border-top: 1px solid #333;
+}
+/* .nav-btn удалена */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+
+    .chat-bubble {
+      background: #2a2a2a;
+      color: #fff;
+      border-radius: 14px;
+      padding: 10px 12px;
+      min-width: 160px;
+      max-width: 240px;
+      font-family: system-ui, sans-serif;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      
+    }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 8px;
+      object-fit: cover;
+    }
+    .username {
+      font-weight: 600;
+      
+    }
+    .chat-text {
+      
+      margin-bottom: 6px;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+    .reactions {
+      display: flex;
+      gap: 6px;
+      
+    }
+    .reaction {
+      background: #3a3a3a;
+      border-radius: 12px;
+      padding: 2px 8px;
+      color: #ccc;
+      cursor: pointer;
+    }
+    .reaction.active {
+      background: #1e90ff;
+      color: white;
+    }
+    .timestamp {
+      text-align: right;
+      font-size: 11px;
+      color: #888;
+      margin-top: 6px;
+    }
+    .views {
+      font-size: 11px;
+      color: #666;
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      opacity: 0.5;
+    }
+    .comment-preview {
+      
+      color: #aaa;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+    .comment-block {
+      margin-top: 6px;
+      
+      color: #ddd;
+      background: #1f1f1f;
+      border-radius: 6px;
+      padding: 4px 6px;
+    }
+
+
+#map {
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+body.loaded #map {
+  opacity: 1;
+}
+
+</style>
+</head>
+<body>
+<div id="map"></div>
+<button id="create-btn">＋</button>
+<div id="message-input">
+  <img src="https://randomuser.me/api/portraits/men/77.jpg" class="avatar" />
+  <textarea id="message-text" rows="3" placeholder="Напишите сообщение..."></textarea>
+  <button onclick="submitMessage()">Отправить</button>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const messages = [{"id": 1, "author": "Олег", "text": "У нас сломался лифт...", "avatar": "https://randomuser.me/api/portraits/women/18.jpg", "likes": 3, "stars": 3, "views": 308, "time": "02:32", "lat": 55.789534, "lng": 37.636347, "online": false, "comments": [{"author": "Петр", "text": "Поддерживаю!"}, {"author": "Лена", "text": "А где это?"}, {"author": "Юля", "text": "😂"}]}, {"id": 2, "author": "Маша", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/men/17.jpg", "likes": 2, "stars": 0, "views": 387, "time": "02:32", "lat": 55.709912, "lng": 37.659629, "online": false, "comments": [{"author": "Петр", "text": "+1"}, {"author": "Дима", "text": "+1"}, {"author": "Лена", "text": "+1"}]}, {"id": 3, "author": "Маша", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/women/52.jpg", "likes": 5, "stars": 1, "views": 64, "time": "02:32", "lat": 55.724739, "lng": 37.621594, "online": false, "comments": [{"author": "Лена", "text": "+1"}], "photo": "https://picsum.photos/300/200"}, {"id": 4, "author": "Гоша", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/women/56.jpg", "likes": 11, "stars": 1, "views": 350, "time": "02:32", "lat": 55.770795, "lng": 37.658851, "online": false, "comments": [{"author": "Петр", "text": "😂"}, {"author": "Юля", "text": "Тоже интересно"}]}, {"id": 5, "author": "Гоша", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/men/45.jpg", "likes": 1, "stars": 2, "views": 127, "time": "02:32", "lat": 55.749243, "lng": 37.658784, "online": false, "comments": [{"author": "Юля", "text": "+1"}]}, {"id": 6, "author": "Гоша", "text": "У нас сломался лифт...", "avatar": "https://randomuser.me/api/portraits/men/15.jpg", "likes": 4, "stars": 3, "views": 79, "time": "02:32", "lat": 55.776197, "lng": 37.630943, "online": false, "comments": [{"author": "Юля", "text": "+1"}, {"author": "Юля", "text": "Поддерживаю!"}, {"author": "Дима", "text": "Поддерживаю!"}]}, {"id": 7, "author": "Аня", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/men/24.jpg", "likes": 3, "stars": 0, "views": 171, "time": "02:32", "lat": 55.751533, "lng": 37.618602, "online": false, "comments": [{"author": "Лена", "text": "+1"}, {"author": "Дима", "text": "Тоже интересно"}]}, {"id": 8, "author": "Ирина", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/women/11.jpg", "likes": 10, "stars": 3, "views": 87, "time": "02:32", "lat": 55.701116, "lng": 37.630961, "online": false, "comments": [{"author": "Лена", "text": "Поддерживаю!"}, {"author": "Петр", "text": "😂"}, {"author": "Дима", "text": "А где это?"}]}, {"id": 9, "author": "Тимур", "text": "Сегодня бесплатный вход в парк!", "avatar": "https://randomuser.me/api/portraits/men/1.jpg", "likes": 12, "stars": 2, "views": 230, "time": "02:32", "lat": 55.750565, "lng": 37.657507, "online": true, "comments": [{"author": "Петр", "text": "+1"}, {"author": "Петр", "text": "Поддерживаю!"}]}, {"id": 10, "author": "Гоша", "text": "Салют с набережной 🔥", "avatar": "https://randomuser.me/api/portraits/men/54.jpg", "likes": 2, "stars": 0, "views": 343, "time": "02:32", "lat": 55.70137, "lng": 37.664447, "online": true, "comments": [{"author": "Юля", "text": "+1"}, {"author": "Юля", "text": "Тоже интересно"}]}, {"id": 11, "author": "Аня", "text": "У нас сломался лифт...", "avatar": "https://randomuser.me/api/portraits/women/17.jpg", "likes": 11, "stars": 3, "views": 394, "time": "02:32", "lat": 55.705415, "lng": 37.62484, "online": true, "comments": []}, {"id": 12, "author": "Аня", "text": "Салют с набережной 🔥", "avatar": "https://randomuser.me/api/portraits/men/6.jpg", "likes": 7, "stars": 0, "views": 89, "time": "02:32", "lat": 55.749823, "lng": 37.619821, "online": true, "comments": []}, {"id": 13, "author": "Олег", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/men/53.jpg", "likes": 9, "stars": 3, "views": 430, "time": "02:32", "lat": 55.784431, "lng": 37.624593, "online": false, "comments": []}, {"id": 14, "author": "Олег", "text": "У нас сломался лифт...", "avatar": "https://randomuser.me/api/portraits/men/24.jpg", "likes": 3, "stars": 2, "views": 234, "time": "02:32", "lat": 55.707666, "lng": 37.575935, "online": true, "comments": []}, {"id": 15, "author": "Аня", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/men/8.jpg", "likes": 14, "stars": 0, "views": 180, "time": "02:32", "lat": 55.728956, "lng": 37.588424, "online": true, "comments": [], "photo": "https://placebear.com/300/200"}, {"id": 16, "author": "Олег", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/women/46.jpg", "likes": 12, "stars": 0, "views": 66, "time": "02:32", "lat": 55.790293, "lng": 37.595431, "online": false, "comments": []}, {"id": 17, "author": "Гоша", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/men/18.jpg", "likes": 4, "stars": 0, "views": 108, "time": "02:32", "lat": 55.746152, "lng": 37.58723, "online": true, "comments": []}, {"id": 18, "author": "Тимур", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/men/49.jpg", "likes": 13, "stars": 2, "views": 168, "time": "02:32", "lat": 55.765484, "lng": 37.58918, "online": true, "comments": []}, {"id": 19, "author": "Маша", "text": "Есть кто с великом?", "avatar": "https://randomuser.me/api/portraits/women/21.jpg", "likes": 1, "stars": 1, "views": 159, "time": "02:32", "lat": 55.771176, "lng": 37.663309, "online": false, "comments": []}, {"id": 20, "author": "Аня", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/men/21.jpg", "likes": 5, "stars": 0, "views": 301, "time": "02:32", "lat": 55.786971, "lng": 37.646296, "online": false, "comments": []}, {"id": 21, "author": "Олег", "text": "Кто гуляет рядом?", "avatar": "https://randomuser.me/api/portraits/women/46.jpg", "likes": 14, "stars": 2, "views": 317, "time": "02:32", "lat": 55.731632, "lng": 37.570584, "online": false, "comments": []}, {"id": 22, "author": "Маша", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/men/45.jpg", "likes": 14, "stars": 1, "views": 318, "time": "02:32", "lat": 55.740114, "lng": 37.629009, "online": false, "comments": []}, {"id": 23, "author": "Олег", "text": "Салют с набережной 🔥", "avatar": "https://randomuser.me/api/portraits/women/34.jpg", "likes": 5, "stars": 2, "views": 138, "time": "02:32", "lat": 55.782996, "lng": 37.594615, "online": false, "comments": []}, {"id": 24, "author": "Маша", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/men/16.jpg", "likes": 9, "stars": 2, "views": 391, "time": "02:32", "lat": 55.718942, "lng": 37.643131, "online": false, "comments": []}, {"id": 25, "author": "Тимур", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/men/37.jpg", "likes": 14, "stars": 3, "views": 232, "time": "02:32", "lat": 55.722873, "lng": 37.657672, "online": true, "comments": []}, {"id": 26, "author": "Ирина", "text": "У нас сломался лифт...", "avatar": "https://randomuser.me/api/portraits/men/20.jpg", "likes": 12, "stars": 1, "views": 360, "time": "02:32", "lat": 55.771708, "lng": 37.580144, "online": true, "comments": [], "photo": "https://placebear.com/300/200"}, {"id": 27, "author": "Маша", "text": "Салют с набережной 🔥", "avatar": "https://randomuser.me/api/portraits/men/4.jpg", "likes": 9, "stars": 1, "views": 318, "time": "02:32", "lat": 55.774369, "lng": 37.617869, "online": false, "comments": []}, {"id": 28, "author": "Маша", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/men/33.jpg", "likes": 14, "stars": 3, "views": 438, "time": "02:32", "lat": 55.740708, "lng": 37.66377, "online": false, "comments": []}, {"id": 29, "author": "Олег", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/men/27.jpg", "likes": 6, "stars": 2, "views": 489, "time": "02:32", "lat": 55.757536, "lng": 37.648021, "online": true, "comments": []}, {"id": 30, "author": "Маша", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/men/40.jpg", "likes": 9, "stars": 1, "views": 473, "time": "02:32", "lat": 55.796839, "lng": 37.663798, "online": true, "comments": []}, {"id": 31, "author": "Олег", "text": "Кто гуляет рядом?", "avatar": "https://randomuser.me/api/portraits/men/10.jpg", "likes": 13, "stars": 2, "views": 458, "time": "02:32", "lat": 55.72594, "lng": 37.643058, "online": true, "comments": []}, {"id": 32, "author": "Маша", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/men/46.jpg", "likes": 13, "stars": 0, "views": 286, "time": "02:32", "lat": 55.720395, "lng": 37.617804, "online": true, "comments": []}, {"id": 33, "author": "Ирина", "text": "У нас сломался лифт...", "avatar": "https://randomuser.me/api/portraits/women/40.jpg", "likes": 6, "stars": 3, "views": 406, "time": "02:32", "lat": 55.779095, "lng": 37.623357, "online": false, "comments": []}, {"id": 34, "author": "Аня", "text": "Кто гуляет рядом?", "avatar": "https://randomuser.me/api/portraits/women/30.jpg", "likes": 0, "stars": 0, "views": 272, "time": "02:32", "lat": 55.793015, "lng": 37.657968, "online": false, "comments": []}, {"id": 35, "author": "Ирина", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/women/20.jpg", "likes": 4, "stars": 1, "views": 468, "time": "02:32", "lat": 55.701553, "lng": 37.635162, "online": true, "comments": []}, {"id": 36, "author": "Олег", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/men/12.jpg", "likes": 11, "stars": 0, "views": 196, "time": "02:32", "lat": 55.794429, "lng": 37.583775, "online": false, "comments": [], "photo": "https://www.fillmurray.com/300/200"}, {"id": 37, "author": "Аня", "text": "Есть кто с великом?", "avatar": "https://randomuser.me/api/portraits/men/46.jpg", "likes": 2, "stars": 2, "views": 393, "time": "02:32", "lat": 55.798277, "lng": 37.626815, "online": true, "comments": []}, {"id": 38, "author": "Тимур", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/men/55.jpg", "likes": 15, "stars": 3, "views": 241, "time": "02:32", "lat": 55.766795, "lng": 37.57094, "online": false, "comments": []}, {"id": 39, "author": "Аня", "text": "Есть кто с великом?", "avatar": "https://randomuser.me/api/portraits/women/12.jpg", "likes": 13, "stars": 2, "views": 369, "time": "02:32", "lat": 55.762944, "lng": 37.642741, "online": false, "comments": []}, {"id": 40, "author": "Тимур", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/women/46.jpg", "likes": 6, "stars": 2, "views": 416, "time": "02:32", "lat": 55.793282, "lng": 37.62216, "online": false, "comments": [], "photo": "https://placebear.com/300/200"}, {"id": 41, "author": "Ирина", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/men/12.jpg", "likes": 1, "stars": 3, "views": 61, "time": "02:32", "lat": 59.926679, "lng": 30.303362, "online": true, "comments": [], "photo": "https://placekitten.com/300/180"}, {"id": 42, "author": "Ирина", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/men/40.jpg", "likes": 8, "stars": 1, "views": 242, "time": "02:32", "lat": 59.943161, "lng": 30.343601, "online": true, "comments": []}, {"id": 43, "author": "Маша", "text": "Салют с набережной 🔥", "avatar": "https://randomuser.me/api/portraits/women/56.jpg", "likes": 0, "stars": 1, "views": 105, "time": "02:32", "lat": 59.920097, "lng": 30.316139, "online": false, "comments": []}, {"id": 44, "author": "Аня", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/women/31.jpg", "likes": 2, "stars": 1, "views": 475, "time": "02:32", "lat": 59.883974, "lng": 30.341097, "online": false, "comments": []}, {"id": 45, "author": "Гоша", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/men/37.jpg", "likes": 14, "stars": 0, "views": 104, "time": "02:32", "lat": 59.884923, "lng": 30.272901, "online": true, "comments": []}, {"id": 46, "author": "Тимур", "text": "Кто гуляет рядом?", "avatar": "https://randomuser.me/api/portraits/women/32.jpg", "likes": 10, "stars": 1, "views": 398, "time": "02:32", "lat": 59.979107, "lng": 30.295251, "online": false, "comments": []}, {"id": 47, "author": "Гоша", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/women/7.jpg", "likes": 10, "stars": 2, "views": 83, "time": "02:32", "lat": 59.91541, "lng": 30.314735, "online": true, "comments": []}, {"id": 48, "author": "Аня", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/men/59.jpg", "likes": 11, "stars": 0, "views": 54, "time": "02:32", "lat": 59.932813, "lng": 30.267329, "online": false, "comments": []}, {"id": 49, "author": "Аня", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/men/28.jpg", "likes": 9, "stars": 3, "views": 352, "time": "02:32", "lat": 59.951422, "lng": 30.292651, "online": true, "comments": []}, {"id": 50, "author": "Аня", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/women/44.jpg", "likes": 10, "stars": 1, "views": 149, "time": "02:32", "lat": 59.968744, "lng": 30.329455, "online": false, "comments": []}, {"id": 51, "author": "Олег", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/men/4.jpg", "likes": 8, "stars": 3, "views": 457, "time": "02:32", "lat": 59.935507, "lng": 30.332503, "online": true, "comments": []}, {"id": 52, "author": "Ирина", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/men/60.jpg", "likes": 6, "stars": 3, "views": 483, "time": "02:32", "lat": 59.896398, "lng": 30.304428, "online": false, "comments": []}, {"id": 53, "author": "Гоша", "text": "Есть кто с великом?", "avatar": "https://randomuser.me/api/portraits/men/25.jpg", "likes": 15, "stars": 3, "views": 293, "time": "02:32", "lat": 59.967143, "lng": 30.330137, "online": true, "comments": []}, {"id": 54, "author": "Гоша", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/women/17.jpg", "likes": 8, "stars": 0, "views": 433, "time": "02:32", "lat": 59.941348, "lng": 30.332407, "online": false, "comments": []}, {"id": 55, "author": "Олег", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/women/7.jpg", "likes": 12, "stars": 2, "views": 455, "time": "02:32", "lat": 59.951828, "lng": 30.329048, "online": true, "comments": []}, {"id": 56, "author": "Олег", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/men/43.jpg", "likes": 2, "stars": 0, "views": 430, "time": "02:32", "lat": 55.809532, "lng": 49.138526, "online": true, "comments": []}, {"id": 57, "author": "Гоша", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/women/33.jpg", "likes": 12, "stars": 0, "views": 395, "time": "02:32", "lat": 55.769082, "lng": 49.135159, "online": false, "comments": []}, {"id": 58, "author": "Гоша", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/men/40.jpg", "likes": 7, "stars": 3, "views": 357, "time": "02:32", "lat": 55.754676, "lng": 49.133944, "online": true, "comments": []}, {"id": 59, "author": "Маша", "text": "Салют с набережной 🔥", "avatar": "https://randomuser.me/api/portraits/women/20.jpg", "likes": 0, "stars": 3, "views": 314, "time": "02:32", "lat": 55.796285, "lng": 49.077407, "online": false, "comments": []}, {"id": 60, "author": "Олег", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/women/8.jpg", "likes": 4, "stars": 1, "views": 320, "time": "02:32", "lat": 55.770915, "lng": 49.137328, "online": false, "comments": []}, {"id": 61, "author": "Маша", "text": "Салют с набережной 🔥", "avatar": "https://randomuser.me/api/portraits/women/24.jpg", "likes": 9, "stars": 3, "views": 183, "time": "02:32", "lat": 55.764746, "lng": 49.078261, "online": true, "comments": [], "photo": "https://placebear.com/300/200"}, {"id": 62, "author": "Ирина", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/women/3.jpg", "likes": 15, "stars": 2, "views": 215, "time": "02:32", "lat": 55.776528, "lng": 49.075783, "online": false, "comments": []}, {"id": 63, "author": "Ирина", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/women/57.jpg", "likes": 7, "stars": 3, "views": 487, "time": "02:32", "lat": 55.785824, "lng": 49.1641, "online": false, "comments": []}, {"id": 64, "author": "Тимур", "text": "Сегодня бесплатный вход в парк!", "avatar": "https://randomuser.me/api/portraits/men/17.jpg", "likes": 3, "stars": 0, "views": 316, "time": "02:32", "lat": 55.808101, "lng": 49.135215, "online": false, "comments": [], "photo": "https://placekitten.com/300/180"}, {"id": 65, "author": "Гоша", "text": "Кто идёт в кино?", "avatar": "https://randomuser.me/api/portraits/men/26.jpg", "likes": 0, "stars": 1, "views": 151, "time": "02:32", "lat": 55.810682, "lng": 49.085217, "online": true, "comments": []}, {"id": 66, "author": "Тимур", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/men/26.jpg", "likes": 10, "stars": 1, "views": 275, "time": "02:32", "lat": 59.948735, "lng": 30.304149, "online": true, "comments": []}, {"id": 67, "author": "Ирина", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/men/55.jpg", "likes": 9, "stars": 1, "views": 499, "time": "02:32", "lat": 56.805734, "lng": 60.592381, "online": false, "comments": []}, {"id": 68, "author": "Олег", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/women/15.jpg", "likes": 14, "stars": 1, "views": 224, "time": "02:32", "lat": 56.283384, "lng": 43.968193, "online": true, "comments": [], "photo": "https://www.fillmurray.com/300/200"}, {"id": 69, "author": "Гоша", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/men/35.jpg", "likes": 3, "stars": 1, "views": 261, "time": "02:32", "lat": 47.174245, "lng": 39.735964, "online": true, "comments": []}, {"id": 70, "author": "Аня", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/men/16.jpg", "likes": 14, "stars": 1, "views": 345, "time": "02:32", "lat": 56.844154, "lng": 60.579031, "online": true, "comments": []}, {"id": 71, "author": "Маша", "text": "У нас сломался лифт...", "avatar": "https://randomuser.me/api/portraits/men/15.jpg", "likes": 7, "stars": 2, "views": 267, "time": "02:32", "lat": 56.790497, "lng": 60.601446, "online": false, "comments": []}, {"id": 72, "author": "Олег", "text": "Ищу зарядку Type-C срочно!", "avatar": "https://randomuser.me/api/portraits/men/50.jpg", "likes": 9, "stars": 1, "views": 386, "time": "02:32", "lat": 55.798478, "lng": 49.124371, "online": true, "comments": [], "photo": "https://placebear.com/300/200"}, {"id": 73, "author": "Ирина", "text": "Пропала собака, помогите!", "avatar": "https://randomuser.me/api/portraits/men/38.jpg", "likes": 2, "stars": 3, "views": 333, "time": "02:32", "lat": 55.759548, "lng": 37.630978, "online": false, "comments": []}, {"id": 74, "author": "Ирина", "text": "Есть кто с великом?", "avatar": "https://randomuser.me/api/portraits/women/48.jpg", "likes": 2, "stars": 1, "views": 309, "time": "02:32", "lat": 55.065929, "lng": 82.943343, "online": true, "comments": []}, {"id": 75, "author": "Тимур", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/men/55.jpg", "likes": 14, "stars": 0, "views": 370, "time": "02:32", "lat": 59.928041, "lng": 30.293428, "online": true, "comments": []}, {"id": 76, "author": "Гоша", "text": "У нас сломался лифт...", "avatar": "https://randomuser.me/api/portraits/men/52.jpg", "likes": 4, "stars": 0, "views": 382, "time": "02:32", "lat": 47.196294, "lng": 39.719568, "online": false, "comments": []}, {"id": 77, "author": "Маша", "text": "Кто гуляет рядом?", "avatar": "https://randomuser.me/api/portraits/men/56.jpg", "likes": 8, "stars": 0, "views": 94, "time": "02:32", "lat": 59.902322, "lng": 30.28222, "online": false, "comments": [], "photo": "https://placekitten.com/300/180"}, {"id": 78, "author": "Ирина", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/women/38.jpg", "likes": 6, "stars": 0, "views": 305, "time": "02:32", "lat": 55.753955, "lng": 49.163622, "online": true, "comments": []}, {"id": 79, "author": "Маша", "text": "Где ближайшая аптека?", "avatar": "https://randomuser.me/api/portraits/women/3.jpg", "likes": 13, "stars": 1, "views": 392, "time": "02:32", "lat": 56.314534, "lng": 44.041544, "online": true, "comments": []}, {"id": 80, "author": "Тимур", "text": "Ищу попутчика до метро.", "avatar": "https://randomuser.me/api/portraits/women/57.jpg", "likes": 13, "stars": 1, "views": 186, "time": "02:32", "lat": 55.063879, "lng": 82.890358, "online": false, "comments": []}];
+
+const map = L.map('map').setView([56.5, 43.5], 5);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap contributors & CartoDB',
+  maxZoom: 18
+}).addTo(map);
+
+function renderMessage(msg) {
+  const hasComments = msg.comments && msg.comments.length > 0;
+  const preview = hasComments ? `<div class='comment-preview' onclick='toggleComments(${msg.id})'>💬 ${msg.comments.length} комм.</div>` : "";
+  const commentBlock = hasComments
+    ? `<div class='comment-block' id='comments-${msg.id}' style='display:none'>` +
+        msg.comments.map(c => `<div><b>${c.author}:</b> ${c.text}</div>`).join('') +
+      `</div>` : "";
+  const scale = 1 + (msg.stars || 0) * 0.15;
+  const img = msg.photo ? `<img src="${msg.photo}" style="width:100%; border-radius:10px; margin-top:6px;" />` : '';
+  const icon = L.divIcon({
+    className: '',
+    html: `
+      <div class="chat-bubble" style="transform: scale(${scale})">
+        <div class="chat-header">
+          <img src="${msg.avatar}" class="avatar" />
+          <div class="username">${msg.author}</div>
+        </div>
+        <div class="chat-text">${msg.text}</div>
+        <div class="reactions">
+          <div class="reaction active" onclick="likeMessage(${msg.id})">❤️ <span id="like-${msg.id}">${msg.likes}</span></div>
+          <div class="reaction active" onclick="starMessage(${msg.id})">⭐ <span id="star-${msg.id}">${msg.stars}</span></div>
+        </div>
+        <div class="views">👁 ${msg.views}</div>
+        ${preview}
+        ${commentBlock}
+        <div class="timestamp">${msg.time}</div>
+        ${img}
+      </div>
+    `
+  });
+  L.marker([msg.lat, msg.lng], { icon }).addTo(map);
+}
+
+function likeMessage(id) {
+  const el = document.getElementById(`like-${id}`);
+  el.textContent = parseInt(el.textContent) + 1;
+}
+function starMessage(id) {
+  const el = document.getElementById(`star-${id}`);
+  el.textContent = parseInt(el.textContent) + 1;
+}
+function toggleComments(id) {
+  const block = document.getElementById(`comments-${id}`);
+  if (block) {
+    block.style.display = block.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+document.getElementById('create-btn').addEventListener('click', () => {
+  const target = [55.757, 37.615];
+  map.flyTo(target, 17, { animate: true, duration: 2 });
+  setTimeout(() => {
+    document.getElementById('message-input').style.display = 'block';
+  }, 2000);
+});
+
+function submitMessage() {
+  const text = document.getElementById('message-text').value.trim();
+  if (!text) return;
+  const id = Date.now();
+  const newMsg = {
+    id,
+    author: "Вы",
+    text,
+    avatar: "https://randomuser.me/api/portraits/men/77.jpg",
+    likes: 0,
+    stars: 0,
+    views: Math.floor(Math.random() * 100),
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    lat: 55.757,
+    lng: 37.615,
+    online: true,
+    comments: []
+  };
+  messages.push(newMsg);
+  renderMessage(newMsg);
+  document.getElementById('message-text').value = '';
+  document.getElementById('message-input').style.display = 'none';
+}
+
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.body.classList.add('loaded');
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const coords = [pos.coords.latitude, pos.coords.longitude];
+        map.flyTo(coords, 14, { animate: true, duration: 2 });
+        L.circleMarker(coords, {
+          radius: 8, color: "#1e90ff", fillColor: "#1e90ff", fillOpacity: 0.8
+        }).addTo(map);
+      });
+    }
+  }, 400);
+});
+
+messages.forEach(renderMessage);
+</script>
+
+<!-- удалённый подвал -->
+  <button class="nav-btn">🏠</button>
+  <button class="nav-btn">🗺</button>
+  <button class="nav-btn">✏️</button>
+  <button class="nav-btn">👤</button>
+</div>
+
+</body>
+</html>
