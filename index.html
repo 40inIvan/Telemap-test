@@ -71,13 +71,28 @@ button, select {
       width: 32px; height: 32px; border-radius: 50%;
       margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;
     }
-    #message-input textarea {
-      width: 100%; padding: 8px; 
-      border: none; border-radius: 8px; resize: none; margin-bottom: 8px;
+    #message-input input, #message-input textarea {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      resize: none;
+      margin-bottom: 8px;
     }
     #message-input button {
-      width: 100%; padding: 8px; 
-      background: #1e90ff; color: white; border: none; border-radius: 8px;
+      width: 100%;
+      padding: 8px;
+      background: #1e90ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+    .video-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-top: 6px;
     }
   
 
@@ -177,7 +192,9 @@ body.loaded #map {
 <div id="message-input">
   <img src="https://randomuser.me/api/portraits/men/77.jpg" class="avatar" />
   <textarea id="message-text" rows="3" placeholder="Напишите сообщение..."></textarea>
+  <input id="video-url" type="url" placeholder="Ссылка на видео (необязательно)" />
   <button onclick="submitMessage()">Отправить</button>
+</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 let messages = [];
@@ -208,6 +225,7 @@ function renderMessage(msg) {
       `</div>` : "";
   const scale = 1 + (msg.stars || 0) * 0.15;
   const img = msg.photo ? `<img src="${msg.photo}" style="width:100%; border-radius:10px; margin-top:6px;" />` : '';
+  const vid = msg.video ? `<video class="video-circle" src="${msg.video}" autoplay muted loop playsinline></video>` : '';
   const icon = L.divIcon({
     className: '',
     html: `
@@ -226,6 +244,7 @@ function renderMessage(msg) {
         ${commentBlock}
         <div class="timestamp">${msg.time}</div>
         ${img}
+        ${vid}
       </div>
     `
   });
@@ -257,6 +276,7 @@ document.getElementById('create-btn').addEventListener('click', () => {
 
 function submitMessage() {
   const text = document.getElementById('message-text').value.trim();
+  const video = document.getElementById('video-url').value.trim();
   if (!text) return;
   const id = Date.now();
   const newMsg = {
@@ -273,9 +293,11 @@ function submitMessage() {
     online: true,
     comments: []
   };
+  if (video) newMsg.video = video;
   messages.push(newMsg);
   renderMessage(newMsg);
   document.getElementById('message-text').value = '';
+  document.getElementById('video-url').value = '';
   document.getElementById('message-input').style.display = 'none';
 }
 
