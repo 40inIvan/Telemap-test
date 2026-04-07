@@ -1,12 +1,14 @@
-# Telemap Test
+# Tam MVP
 
-Mapssage is a small demo that shows chat-like messages on a map.
-Open `index.html` in a web browser to try it out.
+Tam is a Telegram Mini App MVP concept with three tabs:
+- Feed (circles + posts + geochat)
+- Map (post locations)
+- Profile (basic user card)
 
 ## Running
-1. Ensure `messages.json` is in the same directory.
-2. Simply open `index.html` in any modern browser.
-3. Click the plus button to add a new message.
+1. Keep `index.html` and `messages.json` in the same directory.
+2. Open `index.html` in a browser.
+3. For best result, launch inside Telegram Mini App WebView.
 
-## Development
-All code is plain HTML, CSS and JavaScript. No build tools are needed.
+## Stack
+Vanilla HTML/CSS/JS + Leaflet map.
